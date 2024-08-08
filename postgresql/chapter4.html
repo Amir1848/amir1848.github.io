@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postgresql Optimization</title>
+</head>
+<body>
+    <h3>Chapter 4: (Even More Theory: Execution plan)</h3>
+    <b>reading exection plan</b>
+    <p>
+        let's consider following query:
+    </p>
+    <pre>
+        select * from humanresources.employeepayhistory eh
+        join person.businessentity be on eh.businessentityid = be.businessentityid
+        join person.person p on p.businessentityid = be.businessentityid
+        where lastname= 'Walters'
+    </pre>
+    <p>
+        There are multiple ways for execting this query
+        but if we want to see which way does postgres choose we have 2 options
+    </p>
+    <ol>
+        <li>diagram</li>
+        <li>Explain</li>
+    </ol>
+    <h3>Diagram</h3>
+    <p>
+        in pgadmin you can use button with following shape to see execution diagram
+        <br/>
+        <img src="./images/ebutton.png">
+    </p>
+    <p>here is diagram of upper query</p>
+    <img src="./images/diagram.png">
+
+    <h3>Explain</h3>
+    <p>
+        another way of doing this job is through explain keyword.
+        you should put Explain before your query to see how potgresql execute the query.
+        here is an example from the output of upper query
+    </p>
+    <img src="./images/executionplan.png">
+    <br/>
+    <h3>What Is Going On During Optimization?</h3>
+    <p>
+        the first step is query rewrite(for example replacing view with its query)
+        after that we have following steps:
+        <ul>
+            <li>Determining the possible orders of operations</li>
+            <li>Determining the possible execution algorithms for each operation</li>
+            <li>Comparing the costs of different plans</li>
+            <li>Selecting the optimal execution plan</li>
+        </ul>
+    </p>
+    <h3>Why Are There So Many Execution Plans to Choose From?</h3>
+    <p>
+        Plans may vary in
+        <ul>
+            <li>Order of operations</li>
+            <li>Algorithms used for joins and other operations (e.g., nested loops,
+            hash join)</li>
+            <li>Data retrieval methods (e.g., indexes usage, full scan)</li>
+        </ul>
+    </p>
+    <p>formally speaking, the optimizer finds the best plan by computing
+        the costs for all possible plans and then comparing the costs. But since
+        we know that there are three basic algorithms to execute each join, even
+        a simple SELECT on three tables can generate nine possible execution
+        plans; given the 12 possible join orders, there are 108 possible plans(3*3*12=108). If we then consider all the potential data retrieval
+        methods for each table, there are several thousand plans to compare.
+        Fortunately, PostgreSQL does not check every possible plan.
+        The cost-based optimization algorithm relies on the optimality
+        principle: a sub-plan of an optimal plan is optimal for the corresponding
+        subquery. A plan can be considered a composition of multiple
+        component pieces, or sub-plans. A sub-plan is a plan that includes any
+        operations of the original plan as a root node and all its descendant
+        nodes, that is, all operations that contribute to the input arguments for
+        the operation chosen as a root of the sub-plan. The optimizer builds the
+        optimal plan starting from the smallest sub-plans</p>
+    <h3>How Are Execution Costs Calculated?</h3>
+    <p>The cost of each execution plan depends on</p>
+    <ol>
+        <li>Cost formulas of algorithms used in the plan</li>
+        <li>Statistical data on tables and indexes, including distribution of
+            values</li>
+        <li>System settings (parameters and preferences), such as
+            join_collapse_limit or cpu_index_tuple_cost</li>
+    </ol>
+</body>
