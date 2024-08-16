@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Postgresql Optimization</title>
+  </head>
+  <body>
+    <h3>Chapter 4: (Even More Theory: Short Queries and Indexes)</h3>
+    <p>
+      A query is short when the number of rows needed to compute its output is
+      small, no matter how large the involved tables are. Short queries may read
+      every row from small tables but read only a small percentage of rows from
+      large tables
+    </p>
+    <h3>Index Selectivity</h3>
+    <p>
+      the smaller the number of records that correspond to one value of the
+      index, the lower the index's selectivity value. We do not want to create
+      indexes with high selectivity; index-based data retrieval in this case
+      will take more time than a sequential scan.Since the PostgreSQL optimizer
+      predetermines the cost of each access method, this index would never be
+      used, so performance wouldn’t be compromised. However, it is still
+      undesirable to add a database object that requires storage space and extra
+      time to update but doesn’t provide any benefit.
+    </p>
+    <p>
+      The better (lower) the selectivity of an index, the faster the search.
+      Thus, the most efficient indexes are unique indexes. An index is unique if
+      for each indexed value there is exactly one matching row in the table.
+    </p>
+    <h4>
+      What is the difference between a primary key and a unique constraint?
+    </h4>
+    <p>
+      A common misconception among SQL developers is that a primary key has to
+      be an incrementing numeric value and that each table “has” to have a
+      primary key. Although it often helps to have a numeric incremental primary
+      key (called a surrogate key), a primary key does not have to be numeric,
+      and moreover, it does not have to be a single-attribute constraint. It is
+      possible to define a primary key as a combination of several attributes;
+      it just has to satisfy two conditions: the combination must be UNIQUE and
+      NOT NULL for all of the participating attributes. In contrast, unique
+      constraints in PostgreSQL allow for NULL values. A table can have a single
+      primary key (though a primary key is not required) and multiple unique
+      constraints. Any non-null unique constraint can be chosen to be a primary
+      key for a table; thus, there is no programmatic way to determine the best
+      candidate for a table’s primary key.
+    </p>
+    <br/>
+    <br/>
+    <h2>Indexes and Non-equal Conditions</h2>
+
+    <h3>Indexes and Column Transformations</h3>
+    <p>
+        consider i have table 'person.person' with 19972 records.
+        i have index on column firstname
+        <br/>
+        when i search on this column it uses this index.look at following query
+    </p>
+    <img src="./images/simple-index.PNG">
+    <p>
+        but if i transfer firstname column into another form what happens for execution plan.
+        let's use lower function to see what is going on
+    </p>
+    <img src="./images/lowerconversion.PNG">
+    <p>
+        it can't use index. so for this scenarios we can declare index with that function conversion.
+        let's create index on function conversion.
+        <pre>
+            CREATE index lower_firstname ON person.person(lower(firstname))
+        </pre>
+        now we can see new execution plan
+    </p>
+    <img src="./images/lowerindex.PNG">
+  </body>
+</html>
