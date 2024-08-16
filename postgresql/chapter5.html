@@ -47,31 +47,58 @@
       key for a table; thus, there is no programmatic way to determine the best
       candidate for a table’s primary key.
     </p>
-    <br/>
-    <br/>
+    <br />
+    <br />
     <h2>Indexes and Non-equal Conditions</h2>
 
     <h3>Indexes and Column Transformations</h3>
     <p>
-        consider i have table 'person.person' with 19972 records.
-        i have index on column firstname
-        <br/>
-        when i search on this column it uses this index.look at following query
+      consider i have table 'person.person' with 19972 records. i have index on
+      column firstname
+      <br />
+      when i search on this column it uses this index.look at following query
     </p>
-    <img src="./images/simple-index.PNG">
+    <img src="./images/simple-index.PNG" />
     <p>
-        but if i transfer firstname column into another form what happens for execution plan.
-        let's use lower function to see what is going on
+      but if i transfer firstname column into another form what happens for
+      execution plan. let's use lower function to see what is going on
     </p>
-    <img src="./images/lowerconversion.PNG">
+    <img src="./images/lowerconversion.PNG" />
     <p>
-        it can't use index. so for this scenarios we can declare index with that function conversion.
-        let's create index on function conversion.
-        <pre>
-            CREATE index lower_firstname ON person.person(lower(firstname))
-        </pre>
-        now we can see new execution plan
+      it can't use index. so for this scenarios we can declare index with that
+      function conversion. let's create index on function conversion.
     </p>
-    <img src="./images/lowerindex.PNG">
+    <pre>
+        CREATE index lower_firstname ON person.person(lower(firstname))
+    </pre>
+    <span>now we can see new execution plan</span>
+    <img src="./images/lowerindex.PNG" />
+    <br />
+    <br />
+    <h3>Indexes and the like Operator</h3>
+    <p>
+        let's consider i want to filter those people that first name starts With 'An'.
+        for this purpose i can write query like this.
+    </p>
+    <pre>
+        select * from person.person
+        where firstname like 'An%'
+    </pre>
+    <p>
+        it works fine. But if we look at the execution plan. we see that it doesn't use index.
+        that's because B-Tree indexes doesn't support like operator.
+    </p>
+    <img src="./images/execplanlike.PNG" >
+    <p>
+        One possible solution is to rewrite the query. for this scenario we can say that all records which firstname column is greather than  'Ana' and less than 'Anz'
+    </p>
+    <pre>
+        select * from person.person
+        where firstname >= 'Ana' AND firstname <= 'AnZ'
+    </pre>
+    <p>
+        here we can see the exection plan:
+    </p>
+    <img src="./images/rewritequerylike.PNG"/>
   </body>
 </html>
