@@ -77,28 +77,87 @@
     <br />
     <h3>Indexes and the like Operator</h3>
     <p>
-        let's consider i want to filter those people that first name starts With 'An'.
-        for this purpose i can write query like this.
+      let's consider i want to filter those people that first name starts With
+      'An'. for this purpose i can write query like this.
     </p>
     <pre>
         select * from person.person
         where firstname like 'An%'
     </pre>
     <p>
-        it works fine. But if we look at the execution plan. we see that it doesn't use index.
-        that's because B-Tree indexes doesn't support like operator.
+      it works fine. But if we look at the execution plan. we see that it
+      doesn't use index. that's because B-Tree indexes doesn't support like
+      operator.
     </p>
-    <img src="./images/execplanlike.PNG" >
+    <img src="./images/execplanlike.PNG" />
     <p>
-        One possible solution is to rewrite the query. for this scenario we can say that all records which firstname column is greather than  'Ana' and less than 'Anz'
+      One possible solution is to rewrite the query. for this scenario we can
+      say that all records which firstname column is greather than 'Ana' and
+      less than 'Anz'
     </p>
     <pre>
         select * from person.person
         where firstname >= 'Ana' AND firstname <= 'AnZ'
     </pre>
+    <p>here we can see the exection plan:</p>
+    <img src="./images/rewritequerylike.PNG" />
+    <h3>Using Multiple Indexes</h3>
+    <p>let's consider following query</p>
+    <pre>
+      SELECT * From person.person
+      where firstname = 'Sara' AND title = 'Ms.'
+    </pre>
+    <img src="./images/andqueryplan.PNG" />
     <p>
-        here we can see the exection plan:
+      as you can see the query plan is created with two index scan and using
+      BitmapAND to check the blocks need to fetch. But is there any way to just
+      use one index? The answer is yes
     </p>
-    <img src="./images/rewritequerylike.PNG"/>
+    <h2>Compound Indexes</h2>
+    <p>let's create compoud index with following syntax</p>
+    <pre>
+      CREATE INDEX firstname_title_idx ON person.person(firstname, title)
+    </pre>
+    <p>with this index. the query plan has changed.</p>
+    <img src="./images/compoundplan.PNG" />
+    <p>
+      there is a note with compound index:
+      <br />
+      In general, an index on (X,Y,Z) will be used for searches on X, XY, and
+      XYZ and even (X,Z) but not on Y alone and not on YZ. Thus, when a compound
+      index is created, it's not enough to decide which columns to include;
+      their order must also be considered. Why create compound indexes? After
+      all, the previous section demonstrated that using several indexes together
+      will work just fine. There are two major reasons to create this type of
+      index: lower selectivity and additional data storage
+    </p>
+    <h3>Using Indexes for Data Retrieval</h3>
+    <p>
+      When all the columns from a SELECT statement are included in a compound
+      index, they may be retrieved without accessing the table. This is called
+      the index-only-scan data retrieval method. All of the execution plans in
+      the previous section still needed to read records from the table after
+      they were located using the index scan, because we still needed the values
+      from columns that were not included in the index.
+    </p>
+    <p>let's consider following query:</p>
+    <pre>
+      SELECT businessentityid, firstname From person.person
+      where lastname = 'Goldberg'
+    </pre>
+    <img src="./images/includebefore.PNG" />
+    <p>
+      we want to store all information we need with our index to speedup lookup
+      here we need to specify to store information with index. here we can do
+      this by writing following statement
+    </p>
+    <pre>
+      create index convering_index on person.person(lastname) include (businessentityid, firstname) ;
+    </pre>
+    <img src="./images/coveringindex.PNG" />
+    <p>
+      this indexes called covering indexes. although we could use compound index
+      but it is better for just storing another data with our index
+    </p>
   </body>
 </html>
