@@ -159,5 +159,37 @@
       this indexes called covering indexes. although we could use compound index
       but it is better for just storing another data with our index
     </p>
+
+    <h2>Partial indexes</h2>
+    <p>
+      As implied by the name, a partial index is built on a subset of a table, defined by
+      the WHERE clause of the CREATE INDEX operator.
+    </p>
+    <pre>CREATE INDEX flight_actual_departure_not_null
+      ON flight(actual_departure)
+      WHERE actual_departure IS NOT NULL</pre>
+    
+      <h2>
+        When Are Indexes Not Used
+      </h2>
+      <ul>
+        <li>A small table is completely read into main memory.</li>
+        <li>We need a large proportion of the rows of a table to execute a query.</li>
+      </ul>
+
+      <h3>Avoiding Index Usage</h3>
+      <p>we can modify selection
+        criteria. Recall from the beginning of this chapter that column
+        transformations can block the usage of indexes. At that time, it was
+        framed as a negative impact of column transformation, but it can also
+        be used to improve performance when the goal is to block index usage.
+        If a column is of a numeric type, it can be modified by adding zero to
+        its value. For example, the condition attr1+0=p_value will block the
+        usage of an index on column attr1. For any data type, the
+        coalesce() function will always block the usage of indexes, so,
+        assuming attr2 is not nullable, the condition can be modified to
+        something like coalesce(t1.attr2,
+        '0')=coalesce(t2.attr2, '0').</p>
+
   </body>
 </html>
