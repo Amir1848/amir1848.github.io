@@ -1,0 +1,70 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scss tutorial</title>
+    <link href="./main.css" rel="stylesheet" />
+</head>
+<body>
+    <h1>Scss tutorial</h1>
+    <hr/>
+    <p>
+        scss is a tool for compiling styles written in a new format into regular css file which is well known for browsers.
+        it has some features like variables and functions. with compiling these file you can view simple css codes.
+    </p>
+    <p>
+        installation: <code>npm install -g sass</code>
+        <br/>
+        compiling: <code>sass input.scss output.css</code>
+        <br>
+        if you have vscode installed on your machine you can use extension named "live sass compiler"
+    </p>
+
+    <hr>
+    <h2>features</h2>
+    <p>
+        <h3>variables</h3>
+        you can define variables just like this:
+        <pre><code>
+        $primary-color: #225522;
+
+
+        .some-classes {
+            color: $primary-color;
+        }
+        </code></pre>
+
+        sass compiles upper code into following: 
+        <pre><code>
+        .some-classes {
+            color: #225522;
+        }
+        </code></pre>
+    </p>
+    <p>
+        note that we already have variables supported in plain css files. but it is supported in latest version of browser.
+        by doing this you can support more browsers.
+    </p>
+    <h3>maps</h3>
+    <p>
+        scss have feature that you can define maps and use them. example:
+    </p>
+    <pre><code>
+        $font-weights: (
+            "regular": 400,
+            "bold": 600,
+            "bolder": 800
+        );
+
+        p {
+            font-weight: map-get($font-weights, bolder)
+        }
+    </code></pre>
+    <p>it is compiled to following code:</p>
+    <pre><code>
+        p {
+            font-weight: 800;
+        }
+    </code></pre>
+</body>
+</html>
